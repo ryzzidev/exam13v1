@@ -188,21 +188,20 @@
     <div class="modal-content">
       <h2 id="modalTitle">Error!</h2>
       <p id="modalMsg">Token yang Anda masukkan tidak valid.</p>
-      <button class="close-btn" onclick="closeModal()">TUTUP</button>
+      <button class="close-btn" onclick="close_modal()">TUTUP</button>
     </div>
   </div>
 
   <script>
-    // URL API (Pastikan sudah "Deploy as Web App" dan Access "Anyone")
+    // URL API (Gunakan URL Web App kamu yang sudah di-deploy ulang)
     const API_URL = 'https://script.google.com/macros/s/AKfycbwr2ImoBNG0nvkhkCx04nWJ6LFgkSVxS2vLaSffIJqZ0gNBtP9ua6MZVj_LFp5dm3WxTA/exec';
-    const API_LOG_URL = 'https://script.google.com/macros/s/AKfycbzSBSaYtrXElTS5Tv39MBPdh3DyZhlI7kBhlpsjoC2nZH5lvu7_qtkvkpPDpdHBwS-m/exec';
+    const API_LOG_URL = 'https://script.google.com/macros/s/AKfycby7kuopc4d7sQ2ABBymNRJDwZa0m1DzWc32SR1e9uqxmhWRietmD4YuTKBwkRaSBuyo/exec';
 
     let daftarKode = {};
 
     // Load database token saat halaman dibuka
     async function loadDaftarKode() {
       try {
-        // Menggunakan fetch dengan cache breaker untuk data terbaru
         const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
         if (!response.ok) throw new Error('Database tidak merespon');
         
@@ -217,17 +216,33 @@
       }
     }
 
-    // Fungsi Log ke Google Sheets
+    // FUNGSI LOG GABUNGAN (IP ASLI & MODEL PERANGKAT)
     async function kirimDataLog(tokenTerpakai) {
       try {
+        // 1. Ambil IP Asli via API Publik
+        let realIp = "Tidak terdeteksi";
+        try {
+          const ipRes = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipRes.json();
+          realIp = ipData.ip;
+        } catch (e) { console.log("Gagal deteksi IP"); }
+
+        // 2. Ambil Info Model HP Detail
+        let deviceModel = navigator.platform;
+        if (navigator.userAgentData) {
+          const highEntropy = await navigator.userAgentData.getHighEntropyValues(["model", "platform", "platformVersion"]);
+          deviceModel = (highEntropy.platform + " " + (highEntropy.model || "")).trim();
+        }
+
         const infoData = {
-          sesi: "Akses Token: " + tokenTerpakai,
-          device: navigator.platform,
+          sesi: tokenTerpakai,
+          device: deviceModel,
           browser: navigator.userAgent.split(') ')[1] || "Mobile Browser",
-          waktu: new Date().toLocaleString('id-ID')
+          ip: realIp,
+          userAgent: navigator.userAgent
         };
 
-        // Gunakan mode no-cors untuk menghindari blokir browser saat POST ke Google Script
+        // 3. Kirim ke Google Sheets
         await fetch(API_LOG_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -235,7 +250,7 @@
           body: JSON.stringify(infoData)
         });
       } catch (e) {
-        console.warn("Log gagal terkirim, tapi proses lanjut.");
+        console.warn("Log gagal.");
       }
     }
 
@@ -247,7 +262,6 @@
         return;
       }
 
-      // Cek apakah database sudah terisi
       if (Object.keys(daftarKode).length === 0) {
         showError("Database Error", "Data token belum siap. Silahkan refresh halaman.");
         return;
@@ -256,10 +270,9 @@
       const targetUrl = daftarKode[input];
 
       if (targetUrl) {
-        // Jalankan logging secara background (tidak menunggu agar redirect cepat)
-        kirimDataLog(input);
+        // Kirim Log terlebih dahulu
+        await kirimDataLog(input);
 
-        // Efek transisi keluar
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '0';
         
@@ -267,7 +280,7 @@
           window.location.href = targetUrl;
         }, 500);
       } else {
-        showError("Token Salah", "Token yang Anda masukkan tidak terdaftar atau sudah kadaluwarsa.");
+        showError("Token Salah", "Token yang Anda masukkan tidak terdaftar.");
       }
     }
 
@@ -277,21 +290,19 @@
       document.getElementById('errorModal').style.display = 'flex';
     }
 
-    function closeModal() {
+    function close_modal() {
       document.getElementById('errorModal').style.display = 'none';
       document.getElementById('kodeInput').focus();
     }
 
-    // Event Listeners
     document.getElementById('kodeInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') verifikasiKode();
     });
 
     window.addEventListener('click', (e) => {
-      if (e.target.className === 'modal') closeModal();
+      if (e.target.className === 'modal') close_modal();
     });
 
-    // Jalankan load data
     loadDaftarKode();
   </script>
 </body>
