@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sumatif Akhir Semester Ganjil</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --text: #1e293b;
+      --green: #008e8a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 50px 20px 20px;
+      color: var(--text);
+    }
+
+    .logo {
+      width: 130px;
+      margin-bottom: 35px;
+    }
+
+    .main-title {
+      font-size: 18px;
+      font-weight: 300;
+      text-align: center;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .year-title {
+      font-size: 18px;
+      font-weight: 300;
+      text-align: center;
+      line-height: 1.3;
+      margin-bottom: 40px;
+    }
+
+    .input-group {
+      width: 90%;
+      max-width: 380px;
+      margin-bottom: 30px;
+    }
+
+    .input-token {
+      width: 100%;
+      padding: 15px 20px;
+      text-transform: uppercase;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid #00b4ae;
+      border-radius: 25px;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .input-token:focus {
+      border-color: #00b4ae;
+      box-shadow: 0 0 0 5px rgba(0, 180, 174, 0.2);
+    }
+
+    .info {
+      font-size: 15px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 50px;
+    }
+
+    .foot {
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+
+    .btn {
+      width: 70%;
+      max-width: 380px;
+      padding: 16px;
+      background: var(--green);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 40px; 
+    }
+
+    .btn:hover {
+      background: #006d68;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0, 141, 138, 0.35);
+    }
+
+    /* Loading */
+    #loading {
+      position: fixed; inset: 0; background: white;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; font-size: 19px; font-weight: 600; color: var(--primary);
+    }
+    .spinner {
+      width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid var(--primary);
+      border-radius: 50%; animation: spin 1s linear infinite; margin-top: 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal Error */
+    .modal { 
+      display: none; 
+      position: fixed; inset: 0; 
+      background: rgba(0,0,0,0.6); 
+      backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; 
+      z-index: 9999; 
+    }
+    .modal-content {
+      background: white; 
+      padding: 40px 30px; 
+      border-radius: 20px; 
+      text-align: center;
+      max-width: 340px; width: 90%; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+      border: 3px solid #ef4444;
+    }
+    .modal h2 { 
+      color: #dc2626; 
+      font-size: 26px; 
+      font-weight: 700; 
+      margin-bottom: 15px; 
+    }
+    .close-btn { 
+      margin-top: 20px;
+      padding: 12px 34px; 
+      background: #ef4444; 
+      color: white; 
+      border: none;
+      border-radius: 50px; 
+      font-weight: 600; 
+      cursor: pointer; 
+    }
+    .close-btn:hover { background: #dc2626; }
+  </style>
+</head>
+<body>
+
+  <div id="loading">
+    <div>Menghubungkan Database...</div>
+    <div class="spinner"></div>
+  </div>
+
+  <img src="https://iili.io/fzd1Ma2.png" alt="Logo SMPN 13 Kendari" class="logo">
+
+  <div class="main-title">Asesmen Akhir Berbasis Digital</div>
+  <div class="year-title">Tahun Pelajaran 2025/2026</div>
+
+  <div class="input-group">
+    <input type="text" id="kodeInput" class="input-token" placeholder="INPUT TOKEN SOAL" autocomplete="off" maxlength="50">
+  </div>
+
+  <div class="info">
+    Silahkan input Token Soal sesuai arahan<br>dari Panitia/Pengawas
+  </div>
+
+  <button class="btn" onclick="verifikasiKode()">CEK TOKEN</button>
+
+  <div class="foot">
+    S-Code by : ICT SMPN 13 - with Baso Asril
+  </div>
+
+  <div id="errorModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Error!</h2>
+      <p id="modalMsg">Token yang Anda masukkan tidak valid.</p>
+      <button class="close-btn" onclick="closeModal()">TUTUP</button>
+    </div>
+  </div>
+
+  <script>
+    // URL API (Pastikan sudah "Deploy as Web App" dan Access "Anyone")
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwr2ImoBNG0nvkhkCx04nWJ6LFgkSVxS2vLaSffIJqZ0gNBtP9ua6MZVj_LFp5dm3WxTA/exec';
+    const API_LOG_URL = 'https://script.google.com/macros/s/AKfycbxPGZU68ypyW7hqOLEKjAbiBHrYFa0Nz4R_zKhm-X8mJ53MDkkVGiegXD3Ak8hfimHm/exec';
+
+    let daftarKode = {};
+
+    // Load database token saat halaman dibuka
+    async function loadDaftarKode() {
+      try {
+        // Menggunakan fetch dengan cache breaker untuk data terbaru
+        const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
+        if (!response.ok) throw new Error('Database tidak merespon');
+        
+        daftarKode = await response.json();
+        console.log("Database berhasil dimuat.");
+      } catch (err) {
+        console.error(err);
+        showError("Koneksi Gagal", "Sedang perbaikan");
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('kodeInput').focus();
+      }
+    }
+
+    // Fungsi Log ke Google Sheets
+    async function kirimDataLog(tokenTerpakai) {
+      try {
+        const infoData = {
+          sesi: "Akses Token: " + tokenTerpakai,
+          device: navigator.platform,
+          browser: navigator.userAgent.split(') ')[1] || "Mobile Browser",
+          waktu: new Date().toLocaleString('id-ID')
+        };
+
+        // Gunakan mode no-cors untuk menghindari blokir browser saat POST ke Google Script
+        await fetch(API_LOG_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(infoData)
+        });
+      } catch (e) {
+        console.warn("Log gagal terkirim, tapi proses lanjut.");
+      }
+    }
+
+    async function verifikasiKode() {
+      const input = document.getElementById('kodeInput').value.trim().toUpperCase();
+
+      if (!input) {
+        showError("Input Kosong", "Harap masukkan token soal terlebih dahulu.");
+        return;
+      }
+
+      // Cek apakah database sudah terisi
+      if (Object.keys(daftarKode).length === 0) {
+        showError("Database Error", "Data token belum siap. Silahkan refresh halaman.");
+        return;
+      }
+
+      const targetUrl = daftarKode[input];
+
+      if (targetUrl) {
+        // Jalankan logging secara background (tidak menunggu agar redirect cepat)
+        kirimDataLog(input);
+
+        // Efek transisi keluar
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '0';
+        
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 500);
+      } else {
+        showError("Token Salah", "Token yang Anda masukkan tidak terdaftar atau sudah kadaluwarsa.");
+      }
+    }
+
+    function showError(title, msg) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalMsg').innerText = msg;
+      document.getElementById('errorModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('errorModal').style.display = 'none';
+      document.getElementById('kodeInput').focus();
+    }
+
+    // Event Listeners
+    document.getElementById('kodeInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') verifikasiKode();
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target.className === 'modal') closeModal();
+    });
+
+    // Jalankan load data
+    loadDaftarKode();
+  </script>
+</body>
+</html>
